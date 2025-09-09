@@ -40,6 +40,10 @@ impl<L: Default, F, D: Data<Elem = F>> PredictInplace<ArrayBase<D, Ix2>, Array2<
             &[arr.nrows(), self.models.len()],
             "The number of data points must match the number of output targets."
         );
+        assert!(
+            targets.is_standard_layout(),
+            "targets not in row-major layout"
+        );
         *targets = self
             .models
             .iter()
@@ -49,7 +53,7 @@ impl<L: Default, F, D: Data<Elem = F>> PredictInplace<ArrayBase<D, Ix2>, Array2<
                 targets.into_raw_vec()
             })
             .collect::<Array1<L>>()
-            .into_shape((self.models.len(), arr.len_of(Axis(0))))
+            .into_shape_with_order((self.models.len(), arr.len_of(Axis(0))))
             .unwrap()
             .reversed_axes();
     }
